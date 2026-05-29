@@ -1,6 +1,17 @@
-ID,Folder,Endpoint,Method,Scenario,Input file/body,Expected status,Expected response check,Type,Pass/Fail,Evidence
-TC01,Functional,/health,GET,Service is alive,-,200,status=ok,functional,,
-TC02,Functional,/readings,POST,Create reading happy path,mock-data/sensor-reading-valid.json,201,"has reading_id, accepted=true",functional,,
-TC03,Negative,/readings,POST,Missing device_id,mock-data/sensor-reading-invalid-missing-device.json,400,Problem Details,negative,,
-TC04,Auth,/readings,POST,Missing token,mock-data/sensor-reading-valid.json,401,Problem Details,auth,,
-TC05,Boundary,/readings,POST,High temperature boundary,mock-data/sensor-reading-boundary.json,201/400,documented behavior,boundary,,
+Thư mục Postman,Mã Kiểm Thử,Tên Kịch Bản,Endpoint,Phương Thức,Mã Trạng Thái Kỳ Vọng,Mô Tả Logic Kiểm Thử
+
+01_Functional,TC-CAM-01,Upload Frame thành công,/api/v1/camera/frames,POST,201,Gửi dữ liệu frame kèm cameraId và dữ liệu ảnh base64 hợp lệ
+
+01_Functional,TC-CAM-02,Lấy cấu hình thiết bị camera,/api/v1/camera/devices,GET,200,Truy vấn thông tin danh sách các mắt camera đang hoạt động trong hệ thống
+
+02_Auth,TC-CAM-03,Từ chối khi thiếu Token,/api/v1/camera/frames,POST,401,Không gửi kèm Header Authorization để kiểm tra cơ chế chặn an ninh
+
+03_Negative,TC-CAM-04,Định dạng ảnh không hợp lệ,/api/v1/camera/frames,POST,422,Gửi chuỗi payload chứa dữ liệu ảnh lỗi hoặc sai cấu trúc để kiểm tra ProblemDetails
+
+03_Negative,TC-CAM-05,Thiếu trường cameraId,/api/v1/camera/frames,POST,400,Gửi payload thiếu trường ID định danh của Camera để kiểm tra lỗi Client Bad Request
+
+04_Boundary_Reliability,TC-CAM-06,Kích hoạt lệnh phân tích ranh giới,/api/v1/camera/analyze,POST,202,Gửi lệnh trigger phân tích với ID khung hình ở ngưỡng giới hạn hệ thống
+
+05_Consumer_side_Smoke,TC-CAM-07,Bắt tay liên thông Mock AI Vision,/api/v1/vision/detect,POST,200,Consumer-side Test: Gọi thử sang API của dịch vụ đối tác xem hợp đồng có bị phá vỡ không
+
+06_Local_only_NonFunctional,TC-CAM-08,Kiểm tra SLA độ trễ phản hồi,/api/v1/camera/frames,POST,201,Đo thời gian phản hồi truyền tải khung hình khi chạy ở môi trường Local thật (< 1000ms)
