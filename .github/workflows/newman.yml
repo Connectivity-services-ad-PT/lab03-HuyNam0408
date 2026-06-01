@@ -28,11 +28,11 @@ jobs:
       - name: Start Prism mock servers
         run: |
           npx concurrently --kill-others-on-fail \
-            "npm run mock:iot" \
-            "npm run mock:vision" &
+            "npx prism mock contracts/iot-ingestion.yaml -p 4010" \
+            "npx prism mock contracts/ai-vision.yaml -p 4011" &
 
       - name: Wait for mock servers
-        run: npx wait-on http://localhost:8082/health http://localhost:4011/health --timeout 60000
+        run: npx wait-on http://localhost:4010/health http://localhost:4011/health --timeout 60000
 
       - name: Run Newman contract tests
         run: npm run test:mock
