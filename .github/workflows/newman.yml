@@ -25,12 +25,24 @@ jobs:
       - name: Lint OpenAPI contracts
         run: npm run lint:contracts
 
-      - name: Run Mock Servers and Newman Tests Concurrently
+      - name: Start Prism mock servers
         run: |
-          npx concurrently --success first --kill-others \
-            "npx prism mock contracts/iot-ingestion.yaml -p 4010" \
-            "npx prism mock contracts/ai-vision.yaml -p 4011" \
-            "npx wait-on http://localhost:4010/health http://localhost:4011/health && npm run test:mock"
+          npx prism mock contracts/iot-ingestion.openapi.yaml -p 4010 > prism-iot.log 2>&1 &
+          npx prism mock contracts/ai-vision.openapi.yaml -p 4011 > prism-vision.log 2>&1 &
+
+      - name: Wait for mock servers
+        run: npx wait-on tcp:127.0.0.1:4010 tcp:127.0.0.1:4011 --timeout 30000
+
+      - name: Run Newman contract tests
+        run: npm run test:mock
+
+      - name: Show Prism logs on failure
+        if: failure()
+        run: |
+          echo "=== IOT INGESTION MOCK LOGS ==="
+          cat prism-iot.log || true
+          echo "=== AI VISION MOCK LOGS ==="
+          cat prism-vision.log || true
 
       - name: Upload Newman reports
         if: always()
